@@ -136,7 +136,7 @@ public class MainWindow extends basicWindow {
 
         List<Medico> list = MedicoDataService.SelectAll(false);
         list.forEach(medico -> {
-             Object[] data = {medico.getApellido(), medico.getNombre(), medico.getDni(), medico.getPrecio_consulta(), btnTest };// medico.getStatus() ? "Activo" : "Inactivo"};
+             Object[] data = {medico.getApellido(), medico.getNombre(), medico.getDni(), medico.getPrecio_consulta(), medico.getStatus() ? "Activo" : "Inactivo"};
             //Object[] data = medico.medicoToRow();
             tableModel.addRow(data);
         });
