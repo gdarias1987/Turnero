@@ -121,14 +121,15 @@ public class MedicoDataService extends DBDataService {
     }
 
     public static boolean updateMedico(final Medico medico) {
-        String sql = "UPDATE medicos SET nombre = ?, apellido = ?, valor_consulta = ? WHERE id_medico = ?;";
+        String sql = "UPDATE medicos SET nombre = ?, apellido = ?, dni =?, valor_consulta = ? WHERE id_medico = ?;";
 
         try (Connection conn = connect();
              PreparedStatement pstmt  = conn.prepareStatement(sql)){
             pstmt.setString(1, medico.getNombre());
             pstmt.setString(2, medico.getApellido());
-            pstmt.setDouble(3, medico.getPrecio_consulta());
-            pstmt.setInt(4, medico.getId_medico());
+            pstmt.setDouble(3, medico.getDni());
+            pstmt.setDouble(4, medico.getPrecio_consulta());
+            pstmt.setInt(5, medico.getId_medico());
 
             // ACTUALIZAR
             pstmt.executeUpdate();

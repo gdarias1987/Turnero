@@ -1,37 +1,34 @@
 package ui.panel;
 
-import ui.window.MedicoWindow;
+import ui.style.BasicStyle;
+import ui.window.MainWindow;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import static com.sun.deploy.uitoolkit.ToolkitStore.dispose;
+public class MainPanel {
 
-public class MainPanel extends JPanel {
+    private JPanel panel;
+    private JButton btnMenuMedicos;
+
+    public final JPanel getPanel() {
+        return panel;
+    }
 
     public MainPanel() {
-        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
-//        setBackground(Color.lightGray);
-        setBackground(Color.green);
+        panel = new JPanel();
+        FlowLayout layout = new FlowLayout(FlowLayout.CENTER, 0, 0);
+        panel.setLayout(layout);
+        panel.setBackground(Color.lightGray);
 
-        JButton btnMedicos = new JButton("MENU MEDICOS");
-
-        btnMedicos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                MedicoWindow window = new MedicoWindow();
-
-            }
+        btnMenuMedicos = BasicStyle.getMenuBtn("Menú medicos");
+        btnMenuMedicos.addActionListener((e)->{
+            MedicoPanel medicoPanel = new MedicoPanel();
+            MainWindow.changePage(medicoPanel.getPanel());
         });
 
-        add(btnMedicos, FlowLayout.LEFT);
-
-
-
-        JButton btnPacientes = new JButton("MENU PACIENTES");
-        add(btnPacientes, FlowLayout.RIGHT);
+        panel.add(BasicPanel.createHeaderPanel("Menú inicio"));
+        panel.add(btnMenuMedicos);
     }
 
 
