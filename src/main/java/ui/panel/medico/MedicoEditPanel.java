@@ -1,9 +1,12 @@
-package ui.panel;
+package ui.panel.medico;
 
 import entidades.Medico;
 import service.MedicoDataService;
+import ui.dialog.DialogService;
+import ui.panel.BasicPanel;
 import ui.style.BasicStyle;
 import ui.window.MainWindow;
+import utils.FileLoader;
 import utils.JTextFloatFilter;
 import utils.JTextIntegerFilter;
 import utils.JTextUppercaseFilter;
@@ -11,15 +14,18 @@ import utils.JTextUppercaseFilter;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 public class MedicoEditPanel {
+
+    public static final int WIDTH_LBL = 200;
+    public static final int WIDTH_TXT = 400;
 
     private JPanel panel;
     private Medico seletectedMedico;
     private JButton btnBack;
+
+    private MedicoDataService service;
+    private DialogService dialog;
 
     /*UI*/
     private JLabel lblApellido;
@@ -35,49 +41,53 @@ public class MedicoEditPanel {
     private JButton btnGuardar;
 
     public MedicoEditPanel(int idMedico) {
-        seletectedMedico = MedicoDataService.getMedicoByID(idMedico);
+        service = new MedicoDataService();
+        dialog = new DialogService();
+
+        seletectedMedico = service.getMedicoByID(idMedico);
 
         initUI();
-
-        btnBack = BasicStyle.getBackBtn("Volver a menú");
-        btnBack.addActionListener((e -> {
-            MedicoPanel medicoPanel = new MedicoPanel();
-            MainWindow.changePage(medicoPanel.getPanel());
-        }));
 
         panel = BasicPanel.createBasicPanel();
         panel.add(createPage());
     }
 
+    public JPanel getPanel() {
+        return panel;
+    }
+
     private void initUI() {
-        btnBack = BasicStyle.getBackBtn("Volver a menú");
+        btnBack = BasicStyle.getBackBtn();
         btnBack.addActionListener((e -> {
             MedicoPanel medicoPanel = new MedicoPanel();
             MainWindow.changePage(medicoPanel.getPanel());
         }));
 
-        btnGuardar = BasicStyle.getTableBtn("Guardar cambios");
+        btnGuardar = BasicStyle.getCustomBtn("Guardar cambios", 300, 75);
+        btnGuardar.setIcon(FileLoader.getImageIcon("save48"));
         btnGuardar.addActionListener((e -> {
             boolean control = validateForm();
             if (control) {
                 Medico medico = getUpdatedMedico();
-                boolean controlGuardado = MedicoDataService.updateMedico(medico);
-                MedicoPanel medicoPanel = new MedicoPanel();
-                MainWindow.changePage(medicoPanel.getPanel());
+                boolean controlGuardado = service.updateMedico(medico);
+                if (controlGuardado) {
+                    dialog.showInformationMessage("Confirmación acción",String.format("Se actualizaron los datos del medico %s", medico.getFullname()));
+                    MainWindow.changePage(new MedicoPanel().getPanel());
+                }
             } else {
                 System.out.println(String.format("Not valid: %s", control));
             }
         }));
 
-        lblApellido = getFormLbl("Apellido:");
-        lblNombre = getFormLbl("Nombre:");
-        lblDNI = getFormLbl("DNI:");
-        lblPrecio = getFormLbl("Precio consulta:");
+        lblApellido = BasicStyle.getFormLbl("Apellido:", WIDTH_LBL, 50, 20);
+        lblNombre = BasicStyle.getFormLbl("Nombre:", WIDTH_LBL, 50, 20);
+        lblDNI = BasicStyle.getFormLbl("DNI:", WIDTH_LBL, 50, 20);
+        lblPrecio = BasicStyle.getFormLbl("Precio consulta:", WIDTH_LBL, 50, 20);
 
-        txtApellido = getFormStringTextField(seletectedMedico.getApellido());
-        txtNombre = getFormStringTextField(seletectedMedico.getNombre());
-        txtDNI = getFormNumberTextField(seletectedMedico.getDni().toString());
-        txtPrecio = getFormFloatTextField(BasicStyle.floatFormatted(seletectedMedico.getPrecio_consulta()));
+        txtApellido = BasicStyle.getStringFormTextField(seletectedMedico.getApellido(), WIDTH_TXT, 50, 20);
+        txtNombre = BasicStyle.getStringFormTextField(seletectedMedico.getNombre(), WIDTH_TXT, 50, 20);
+        txtDNI = BasicStyle.getIntFormTextField(seletectedMedico.getDni().toString(), WIDTH_TXT, 50, 20);
+        txtPrecio = BasicStyle.getFloatFormTextField(BasicStyle.floatFormatted(seletectedMedico.getPrecio_consulta()), WIDTH_TXT, 50, 20);
     }
 
     private Medico getUpdatedMedico() {
@@ -125,9 +135,9 @@ public class MedicoEditPanel {
         contentPane.setLayout(layout);
         contentPane.setPreferredSize(new Dimension(800, 490));
 
-        JLabel space = getFormLbl("");
-        space.setPreferredSize(new Dimension(800, 100));
-        contentPane.add(space);
+        JLabel spaceHeader = BasicStyle.getFormLbl("", 800, 100, 20);
+        spaceHeader.setIcon(FileLoader.getImageIcon("icon64"));
+        contentPane.add(spaceHeader);
         contentPane.add(lblApellido);
         contentPane.add(txtApellido);
         contentPane.add(lblNombre);
@@ -136,45 +146,9 @@ public class MedicoEditPanel {
         contentPane.add(txtDNI);
         contentPane.add(lblPrecio);
         contentPane.add(txtPrecio);
+        contentPane.add(BasicStyle.getFormLbl("", 800, 50, 20));
         contentPane.add(btnGuardar);
         return contentPane;
-    }
-
-    private JTextField getFormStringTextField(final String title) {
-        JTextField textField = new JTextField(title);
-        AbstractDocument firstNameDoc = (AbstractDocument) textField.getDocument();
-        firstNameDoc.setDocumentFilter(new JTextUppercaseFilter());
-        textField.setPreferredSize(new Dimension(400, 50));
-        return textField;
-    }
-
-    private JTextField getFormNumberTextField(final String title) {
-        JTextField textField = new JTextField(title);
-        PlainDocument doc = (PlainDocument) textField.getDocument();
-        doc.setDocumentFilter(new JTextIntegerFilter());
-        textField.setPreferredSize(new Dimension(400, 50));
-        return textField;
-    }
-
-    private JTextField getFormFloatTextField(final String title) {
-        JTextField field = new JTextField();
-        field.setDocument(new JTextFloatFilter(JTextFloatFilter.FLOAT));
-        field.setPreferredSize(new Dimension(400, 50));
-        field.setText(title);
-        return field;
-    }
-
-    private JLabel getFormLbl(final String title) {
-        JLabel label = new JLabel(title);
-        label.setFont(BasicStyle.getCustomFont(20));
-        label.setVerticalAlignment(SwingConstants.CENTER);
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setPreferredSize(new Dimension(200, 50));
-        return label;
-    }
-
-    public JPanel getPanel() {
-        return panel;
     }
 
     private boolean validateForm() {
@@ -195,6 +169,7 @@ public class MedicoEditPanel {
 
         if ( apellido.isEmpty() || nombre.isEmpty() || dni.isEmpty() || precio.isEmpty() ) {
             System.out.println("NO PUEDE HABER CAMPOS VACIOS");
+            dialog.showErrorMessage("Datos incorrectos", "No se han ingresado datos");
             return false;
         }
 
@@ -202,6 +177,15 @@ public class MedicoEditPanel {
         boolean controlNombre = seletectedMedico.getNombre().equalsIgnoreCase(nombre);
         boolean controlDNI = seletectedMedico.getDni().compareTo(Integer.valueOf(dni)) == 0 ? true : false;
         boolean controlPrecio = seletectedMedico.getPrecio_consulta().compareTo(precioFloat) == 0 ? true : false;
+
+        if (!controlDNI) {
+            Medico controlMedico = service.getMedicoByDNI(Integer.valueOf(dni));
+            if (controlMedico != null) {
+                System.out.println("YA EXISTE MEDICO");
+                dialog.showErrorMessage("Datos ingresados incorrectos", String.format("El DNI ingresado ya existe, pertenece al medico %s", controlMedico.getFullname()));
+                return false;
+            }
+        }
 
         if ( !controlApellido || !controlNombre || !controlDNI || !controlPrecio ) {
             return true;

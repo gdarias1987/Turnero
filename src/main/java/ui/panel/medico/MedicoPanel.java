@@ -1,24 +1,28 @@
-package ui.panel;
+package ui.panel.medico;
 
 import entidades.Medico;
 import service.MedicoDataService;
+import ui.panel.MainPanel;
 import ui.style.BasicStyle;
 import ui.window.MainWindow;
+import utils.FileLoader;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-import static java.awt.Component.LEFT_ALIGNMENT;
 import static ui.panel.BasicPanel.createBasicPanel;
 
 public class MedicoPanel {
     private JPanel panel;
 
+    private MedicoDataService service;
+
     private JLabel lblMedico;
     private JButton btnMedicoStatus;
     private JButton btnMedicoEdit;
+    private JButton btnMedicoAdd;
 
     private JTable tableMedicos;
 
@@ -26,14 +30,22 @@ public class MedicoPanel {
 
     public MedicoPanel() {
         panel = createBasicPanel();
+        service = new MedicoDataService();
 
-        btnBack = BasicStyle.getBackBtn("Volver a menú");
+        btnBack = BasicStyle.getBackBtn();
         btnBack.addActionListener((e -> {
             MainPanel mainPanel = new MainPanel();
             MainWindow.changePage(mainPanel.getPanel());
         }));
 
-        btnMedicoStatus = BasicStyle.getCustomBtn("Status: -",150, 60);
+        btnMedicoAdd = BasicStyle.getCustomBtn("Agregar", 150, 60);
+        btnMedicoAdd.setIcon(FileLoader.getImageIcon("plus32"));
+        btnMedicoAdd.addActionListener(e -> {
+            MainWindow.changePage(new MedicoAddPanel().getPanel());
+        });
+
+        btnMedicoStatus = BasicStyle.getCustomBtn("Status",150, 60);
+        btnMedicoStatus.setIcon(FileLoader.getImageIcon("delete32"));
         btnMedicoStatus.setEnabled(false);
         btnMedicoStatus.addActionListener(e -> {
             /*
@@ -44,7 +56,7 @@ public class MedicoPanel {
             Integer indexRow = tableMedicos.getSelectedRow();
             int id_medico = (int) tableMedicos.getValueAt(indexRow, 0);
             boolean status = tableMedicos.getValueAt(indexRow, 5 ) == "Activo" ? false : true;
-            boolean result = MedicoDataService.updateMedicoStatus(id_medico, status);
+            boolean result = service.updateMedicoStatus(id_medico, status);
 
             /*
              * Si el resultado de actualizar el status es true
@@ -52,8 +64,9 @@ public class MedicoPanel {
             if (result) {
                 System.out.println(String.format("Medico status updated"));
                 btnMedicoStatus.setEnabled(false);
+                btnMedicoStatus.setIcon(FileLoader.getImageIcon("delete32"));
                 btnMedicoEdit.setEnabled(false);
-                btnMedicoStatus.setText("-");
+                btnMedicoStatus.setText("Status");
                 lblMedico.setText("");
                 tableMedicos.changeSelection(indexRow, 0, true, false);
 
@@ -75,8 +88,9 @@ public class MedicoPanel {
             }
         });
 
-        btnMedicoEdit = BasicStyle.getCustomBtn("Editar Medico",150, 60);
+        btnMedicoEdit = BasicStyle.getCustomBtn("Editar",150, 60);
         btnMedicoEdit.setEnabled(false);
+        btnMedicoEdit.setIcon(FileLoader.getImageIcon("edit32"));
         btnMedicoEdit.addActionListener((e -> {
             Integer indexRow = tableMedicos.getSelectedRow();
             int id_medico = (int) tableMedicos.getValueAt(indexRow, 0);
@@ -87,6 +101,8 @@ public class MedicoPanel {
         lblMedico.setText("");
         lblMedico.setFont(BasicStyle.getMenuBtnFont());
         lblMedico.setPreferredSize(new Dimension(300, 60));
+        lblMedico.setVerticalAlignment(SwingConstants.CENTER);
+        lblMedico.setHorizontalAlignment(SwingConstants.LEADING);
 
         panel.add(createPage());
     }
@@ -107,7 +123,7 @@ public class MedicoPanel {
         contentPane.setBackground(Color.darkGray);
         contentPane.setPreferredSize(new Dimension(800, 80));
 
-        JLabel lblTitulo = BasicStyle.getHeaderTitle("LISTADO DE MEDICOS");
+        JLabel lblTitulo = BasicStyle.getHeaderTitle("Listado de medicos");
         contentPane.add(lblTitulo, BorderLayout.CENTER);
 
         contentPane.add(btnBack, BorderLayout.WEST);
@@ -141,12 +157,13 @@ public class MedicoPanel {
         btnPanel.add(lblMedico);
         btnPanel.add(btnMedicoStatus);
         btnPanel.add(btnMedicoEdit);
+        btnPanel.add(btnMedicoAdd);
         contentPane.add(btnPanel);
         return contentPane;
     }
 
     private void loadMedicosTable(DefaultTableModel tableModel) {
-        java.util.List<Medico> list = MedicoDataService.SelectAll(false);
+        java.util.List<Medico> list = service.SelectAll(false);
         list.forEach(medico -> {
             //Object[] data = {medico.getApellido(), medico.getNombre(), medico.getDni(), medico.getPrecio_consulta(), medico.getStatus() ? "Activo" : "Inactivo"};
             Object[] data = medico.medicoToRow();
@@ -166,12 +183,17 @@ public class MedicoPanel {
                     String status = (String)tableMedicos.getValueAt(indexRow, 5);
 
                     String medicoFullname = String.format("Medico: %s, %s", apellido, nombre, status);
-                    String statusToggle = String.format("Status: %s", status == "Activo" ? "Inactivar" : "Activar");
+                    String btnText = status == "Activo" ? "Desactivar" : "Activar";
 
                     lblMedico.setText(medicoFullname);
-                    lblMedico.setVerticalAlignment(SwingConstants.CENTER);
-                    lblMedico.setHorizontalAlignment(SwingConstants.LEFT);
-                    btnMedicoStatus.setText(statusToggle);
+                    btnMedicoStatus.setText(btnText);
+
+                    if(status == "Activo") {
+                        btnMedicoStatus.setIcon(FileLoader.getImageIcon("delete32"));
+                    } else {
+                        btnMedicoStatus.setIcon(FileLoader.getImageIcon("ok32"));
+                    }
+
                     btnMedicoStatus.setEnabled(true);
                     btnMedicoEdit.setEnabled(true);
                 }

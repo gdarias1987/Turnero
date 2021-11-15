@@ -2,8 +2,6 @@ package ui.window;
 
 import ui.panel.BasicPanel;
 import ui.panel.MainPanel;
-import ui.panel.MedicoEditPanel;
-import ui.panel.MedicoPanel;
 import utils.FileLoader;
 
 import javax.swing.*;
@@ -27,7 +25,7 @@ public class MainWindow {
 //        panel.add(medicoEditPanel.getPanel());
 
         window.add(panel, BorderLayout.CENTER);
-        Image image = FileLoader.getIcon("inicio");
+        Image image = FileLoader.getImage("inicio");
         window.setIconImage(image);
     }
 

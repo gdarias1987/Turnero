@@ -8,7 +8,10 @@ import java.util.List;
 
 public class MedicoDataService extends DBDataService {
 
-    public static List<Medico> SelectAll(boolean actives_only) {
+    public MedicoDataService() {
+    }
+
+    public List<Medico> SelectAll(boolean actives_only) {
         String sql;
 
         if (actives_only) {
@@ -39,7 +42,7 @@ public class MedicoDataService extends DBDataService {
         }
     }
 
-    public static Medico createMedico(final Medico medico) {
+    public Medico createMedico(final Medico medico) {
         String sql = "INSERT INTO medicos (dni,apellido,nombre,valor_consulta) values (?,?,?,?);";
 
         try (Connection conn = connect();
@@ -57,7 +60,7 @@ public class MedicoDataService extends DBDataService {
         return medico;
     }
 
-    public static Medico getMedicoByID(int id_medico){
+    public Medico getMedicoByID(int id_medico){
         String sql = "SELECT * FROM medicos WHERE id_medico = ?;";
 
         try (Connection conn = connect();
@@ -79,7 +82,7 @@ public class MedicoDataService extends DBDataService {
         return null;
     }
 
-    public static Medico getMedicoByDNI(int dni){
+    public Medico getMedicoByDNI(int dni){
         String sql = "SELECT * FROM medicos WHERE dni = ?;";
 
         try (Connection conn = connect();
@@ -102,7 +105,7 @@ public class MedicoDataService extends DBDataService {
     }
 
     // ALTA/BAJA LOGICA DE MEDICO
-    public static boolean updateMedicoStatus(final int id_medico, boolean status) {
+    public boolean updateMedicoStatus(final int id_medico, boolean status) {
         String sql = "UPDATE medicos SET status = ? WHERE id_medico = ?;";
 
         try (Connection conn = connect();
@@ -120,7 +123,7 @@ public class MedicoDataService extends DBDataService {
         return false;
     }
 
-    public static boolean updateMedico(final Medico medico) {
+    public boolean updateMedico(final Medico medico) {
         String sql = "UPDATE medicos SET nombre = ?, apellido = ?, dni =?, valor_consulta = ? WHERE id_medico = ?;";
 
         try (Connection conn = connect();

@@ -38,8 +38,6 @@ public class BasicPanel extends JPanel {
         return panel;
     }
 
-
-
     public static JPanel createHeaderPanel(String title) {
         JPanel contentPane = new JPanel(new BorderLayout());
 
@@ -47,7 +45,7 @@ public class BasicPanel extends JPanel {
         contentPane.setPreferredSize(new Dimension(800, 80));
 
         JLabel lblTitulo = new JLabel(title);
-        lblTitulo.setIcon(new ImageIcon(FileLoader.getIcon("inicio64")));
+        lblTitulo.setIcon(new ImageIcon(FileLoader.getImage("inicio64")));
         lblTitulo.setHorizontalAlignment(JLabel.CENTER);
         lblTitulo.setVerticalAlignment(JLabel.CENTER);
         lblTitulo.setFont(BasicStyle.getTitleFont());
